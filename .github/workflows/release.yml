@@ -61,7 +61,7 @@ jobs:
       - name: Verify production packaging and prepare upgrade test
         if: contains(github.event.head_commit.message, '[release-signed]')
         run: |
-          gzip -dc release/QuickNotes-v1.8.3.apk.gz > build/production.apk
+          gzip -dc release/QuickNotes-v1.8.4.apk.gz > build/production.apk
           python3 scripts/check_apk_alignment.py build/production.apk
           "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 4 build/production.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose build/production.apk
@@ -80,7 +80,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            adb install --no-incremental dist/QuickNotes-v1.8.3.apk
+            adb install --no-incremental dist/QuickNotes-v1.8.4.apk
             adb install --no-incremental build/native-tests.apk
             adb shell pm grant com.quicknotes.app android.permission.POST_NOTIFICATIONS
             adb shell appops set com.quicknotes.app SCHEDULE_EXACT_ALARM allow
@@ -121,29 +121,29 @@ jobs:
       - name: Compile source and verify APK
         run: |
           ./build.sh
-          gzip -dk release/QuickNotes-v1.8.3.apk.gz
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release/QuickNotes-v1.8.3.apk
+          gzip -dk release/QuickNotes-v1.8.4.apk.gz
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose release/QuickNotes-v1.8.4.apk
           python3 tests/check_release.py
-          python3 scripts/check_apk_alignment.py release/QuickNotes-v1.8.3.apk
-          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 4 release/QuickNotes-v1.8.3.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs release/QuickNotes-v1.8.3.apk | grep -q '4b76d05ec8ac6f20fd86b4e79b25e65f8b3be1dae1d02f5731c98d6c767fa843'
+          python3 scripts/check_apk_alignment.py release/QuickNotes-v1.8.4.apk
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 4 release/QuickNotes-v1.8.4.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs release/QuickNotes-v1.8.4.apk | grep -q '4b76d05ec8ac6f20fd86b4e79b25e65f8b3be1dae1d02f5731c98d6c767fa843'
       - name: Prepare assets
         run: |
-          cp release/QuickNotes-v1.8.3.apk dist/QuickNotes-v1.8.3.apk
-          git archive --format=zip --prefix=QuickNotes/ HEAD -o dist/QuickNotes-source-v1.8.3.zip
+          cp release/QuickNotes-v1.8.4.apk dist/QuickNotes-v1.8.4.apk
+          git archive --format=zip --prefix=QuickNotes/ HEAD -o dist/QuickNotes-source-v1.8.4.zip
           cp spec.md dist/spec.md
           cd dist
-          sha256sum QuickNotes-v1.8.3.apk QuickNotes-source-v1.8.3.zip spec.md > SHA256SUMS
+          sha256sum QuickNotes-v1.8.4.apk QuickNotes-source-v1.8.4.zip spec.md > SHA256SUMS
       - name: Publish release from main
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! gh release view v1.8.3 >/dev/null 2>&1; then
-            gh release create v1.8.3 --target "$GITHUB_SHA" --title 'QuickNotes 1.8.3' --notes-file release-notes.md
+          if ! gh release view v1.8.4 >/dev/null 2>&1; then
+            gh release create v1.8.4 --target "$GITHUB_SHA" --title 'QuickNotes 1.8.4' --notes-file release-notes.md
           else
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/v1.8.3" -f sha="$GITHUB_SHA" -F force=true
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/v1.8.4" -f sha="$GITHUB_SHA" -F force=true
           fi
-          gh release upload v1.8.3 dist/QuickNotes-v1.8.3.apk dist/QuickNotes-source-v1.8.3.zip dist/spec.md dist/SHA256SUMS --clobber
+          gh release upload v1.8.4 dist/QuickNotes-v1.8.4.apk dist/QuickNotes-source-v1.8.4.zip dist/spec.md dist/SHA256SUMS --clobber
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -76,9 +76,15 @@ public class NativeTests extends Instrumentation {
   Reminders.notifyReminder(context,liveItem);Reminders.notifyReminder(context,liveItem,true);awaitNotification(nm,"native-alarm-test",false);
   check(Reminders.waitingForNotificationDue(liveItem,System.currentTimeMillis()),"Future flagged guard failed");
   check(!Reminders.waitingForNotificationDue(liveItem,liveItem.optLong("due")),"Due flagged reminder was blocked");
+  // An undated flag must not create a notification or timer, even through direct calls.
+  liveItem.put("due",0);store(liveData);Reminders.notifyReminder(context,liveItem);Reminders.notifyReminder(context,liveItem,false,false);awaitNotification(nm,"native-alarm-test",false);
+  check(Reminders.waitingForNotificationDue(liveItem,System.currentTimeMillis()),"Undated flagged guard failed");
+  // Silent refresh must wait for successful delivery of this exact due occurrence.
+  liveItem.put("due",System.currentTimeMillis()-2000);context.getSharedPreferences(Reminders.PREFS,0).edit().remove("delivered:native-alarm-test").commit();
+  Reminders.notifyReminder(context,liveItem,false,false);awaitNotification(nm,"native-alarm-test",false);
   // Actual due-time broadcast still posts an ongoing notification without a countdown.
   liveItem.put("due",System.currentTimeMillis()+6000);store(liveData);awaitNotification(nm,"native-alarm-test",false);awaitNotification(nm,"native-alarm-test",true,20000);
-  boolean liveFound=false;for(android.service.notification.StatusBarNotification n:nm.getActiveNotifications())if("native-alarm-test".equals(n.getTag())){liveFound=true;check((n.getNotification().flags&Notification.FLAG_ONGOING_EVENT)!=0,"Due flagged reminder is not ongoing");check(!n.getNotification().extras.getBoolean(Notification.EXTRA_CHRONOMETER_COUNT_DOWN),"Due flagged reminder counts down");}check(liveFound,"No flagged due notification");
+  boolean liveFound=false;for(android.service.notification.StatusBarNotification n:nm.getActiveNotifications())if("native-alarm-test".equals(n.getTag())){liveFound=true;check((n.getNotification().flags&Notification.FLAG_ONGOING_EVENT)!=0,"Due flagged reminder is not ongoing");check(n.getNotification().extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER),"Due flagged timer is absent");check(context.getSharedPreferences(Reminders.PREFS,0).getLong("delivered:native-alarm-test",-1)==liveItem.optLong("due"),"Flagged timer preceded due delivery");check(!n.getNotification().extras.getBoolean(Notification.EXTRA_CHRONOMETER_COUNT_DOWN),"Due flagged reminder counts down");}check(liveFound,"No flagged due notification");
   // Moving a visible due reminder into the future removes the old notification.
   liveItem.put("due",System.currentTimeMillis()+3600000);store(liveData);awaitNotification(nm,"native-alarm-test",false);
   // Changing a live reminder to urgent removes it immediately, even with early reminders.
@@ -90,7 +96,7 @@ public class NativeTests extends Instrumentation {
   awaitRing(false,2000);awaitNotification(nm,"native-alarm-test",false);
   liveItem.put("urgent",false);store(liveData);awaitNotification(nm,"native-alarm-test",false);
   liveItem.put("due",System.currentTimeMillis()-1000);store(liveData);awaitNotification(nm,"native-alarm-test",true);
-  liveItem.put("flag",false);store(liveData);awaitNotification(nm,"native-alarm-test",false);
+  liveItem.put("flag",false);store(liveData);for(android.service.notification.StatusBarNotification n:nm.getActiveNotifications())if("native-alarm-test".equals(n.getTag()))check((n.getNotification().flags&Notification.FLAG_ONGOING_EVENT)==0,"Unflagging retained a persistent timer");nm.cancelAll();
   // Deliver an ordinary exact reminder while the activity is stopped and screen is off.
   JSONObject regular=data(System.currentTimeMillis()+6000);regular.getJSONArray("items").getJSONObject(0).put("urgent",false);store(regular);shell("input keyevent 223");awaitNotification(nm,"native-alarm-test",true,20000);check(!ringing(),"Regular reminder started urgent audio");check(context.getSharedPreferences(Reminders.PREFS,0).getLong("delivered:native-alarm-test",0)==regular.getJSONArray("items").getJSONObject(0).optLong("due"),"Background delivery was not persisted");shell("input keyevent 224");shell("wm dismiss-keyguard");
   // Recover a missed ordinary alert on reschedule, without repeatedly alerting on later saves.

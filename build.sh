@@ -19,7 +19,7 @@ if [ -z "$GRADLE" ]; then [ -x .tools/gradle-8.9/bin/gradle ] || ./install.sh; G
 cp -a app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes/. build/classes/
 unzip -oq app/build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/processReleaseResources/R.jar -d build/classes
 "$BT/zipalign" -f -P 16 4 app/build/outputs/apk/release/app-release-unsigned.apk build/aligned.apk
-"$BT/apksigner" sign --ks "$KEY" --ks-pass "pass:$PASS" --out dist/QuickNotes-v1.8.3.apk build/aligned.apk
-"$BT/apksigner" verify --verbose dist/QuickNotes-v1.8.3.apk
+"$BT/apksigner" sign --ks "$KEY" --ks-pass "pass:$PASS" --out dist/QuickNotes-v1.8.4.apk build/aligned.apk
+"$BT/apksigner" verify --verbose dist/QuickNotes-v1.8.4.apk
 
-python3 scripts/check_apk_alignment.py dist/QuickNotes-v1.8.3.apk
+python3 scripts/check_apk_alignment.py dist/QuickNotes-v1.8.4.apk

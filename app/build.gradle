@@ -3,7 +3,7 @@ android {
     namespace 'com.quicknotes.app'
     compileSdk 35
     buildToolsVersion '35.0.0'
-    defaultConfig { applicationId 'com.quicknotes.app'; minSdk 26; targetSdk 35; versionCode 12; versionName '1.8.3' }
+    defaultConfig { applicationId 'com.quicknotes.app'; minSdk 26; targetSdk 35; versionCode 13; versionName '1.8.4' }
     buildTypes { release { minifyEnabled false } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
     androidResources { noCompress 'wav' }

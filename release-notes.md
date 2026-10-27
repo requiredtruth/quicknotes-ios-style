@@ -1,6 +1,5 @@
-# QuickNotes 1.8.3
+QuickNotes 1.8.4
 
-- Flagged reminders with a future due time no longer appear as countdown notifications.
-- Moving a due reminder into the future clears its existing notification.
-- Flagged reminders still alert and remain ongoing when due. Early alerts are suppressed while flagged.
-- Urgent reminders retain the due-only notification and alarm behavior.
+- Flagged non-urgent reminders stay out of timer notifications until due and the due alert has been posted.
+- Undated flagged reminders stay hidden. Silent refreshes require delivery of the current due occurrence.
+- Retains the due-only urgent reminder behavior.

@@ -164,3 +164,7 @@ Urgent reminders never show a notification or alarm screen before their due time
 
 ## 1.8.3: flagged notification visibility
 Flagged reminders with a future due timestamp do not publish notifications, including early alerts. Scheduling, direct notification publication, and reconciliation share the visibility check; changing a due reminder to a future timestamp cancels the existing notification. Due-time alarm broadcasts still publish ongoing flagged notifications, with an elapsed-time chronometer and no countdown. Undated non-urgent flagged reminders retain a static ongoing notification. Unflagged non-urgent early reminders remain available. This supersedes the pre-due countdown behavior described in 1.8.0 and 1.8.2. Android instrumentation covers save, direct/early publication, actual due-time delivery, and rescheduling into the future. Version code is 12.
+
+
+## 1.8.4: flagged notification delivery
+Flagged non-urgent reminders require a positive due date at or before now. Their first due notification posts the alert and then records delivery for that exact due date. Silent persistent refreshes require that delivery record. Undated and future reminders never show a timer; moving a reminder into the future clears its old notification.
